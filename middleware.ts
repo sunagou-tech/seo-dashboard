@@ -22,5 +22,6 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // api/cron はBasic認証の対象外（CRON_SECRETで保護）
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/cron).*)"],
 };

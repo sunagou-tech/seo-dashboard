@@ -18,6 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 {p.name}
               </Link>
             ))}
+            <Link href="/new" className="nav-tab" style={{ marginLeft: "auto" }}>
+              ＋ 案件追加
+            </Link>
           </div>
         </nav>
         <div className="container">{children}</div>

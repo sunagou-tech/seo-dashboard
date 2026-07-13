@@ -5,10 +5,12 @@
 
 ## 機能
 
-- 全体サマリー＋案件ごとのタブ
-- 週 / 月 / 全期間の切り替えレポート（クリック・表示回数・CTR・平均順位・記事作成数）
-- 検索ワードTOP20（順位の色分け: 1〜3位緑、4〜10位オレンジ）
-- 人気ページTOP10、記事一覧、案件詳細・講師情報、知見ノート
+- 全体サマリー＋案件ごとのタブ、画面からの案件追加（GitHub自動コミット）
+- 週 / 月 / 全期間の切り替えレポート（クリック・表示回数・CTR・平均順位・記事作成数・前期間比）
+- **記事×検索データ分析**: 記事一覧にGSC実測値を結合。記事ごとの詳細ページで流入クエリを確認
+- **リライト候補の自動判定**: 「主力」（表示回数シェア30%以上→強化）「あと一歩」（4〜15位→上位化）「タイトル改善」（順位のわりにCTR低）「下落」（クリック30%減）
+- **順位監視の自動化**: 毎週月曜9時にピラーKW順位を自動記録、履歴テーブル表示、下落時Slack通知
+- **週次レポート自動生成**: `vault/案件/<slug>/レポート/` にMDで自動コミット→Obsidianに知見が貯まる
 - Basic認証（環境変数で有効化）
 
 ## セットアップ
@@ -33,6 +35,18 @@
 | `GSC_SERVICE_ACCOUNT_JSON` | ダウンロードしたJSONキーの**中身全文** |
 | `DASHBOARD_USER` | ダッシュボードのログインID |
 | `DASHBOARD_PASS` | パスワード（クライアントデータを扱うので必須） |
+| `GITHUB_REPO` | `ユーザー名/リポジトリ名`（画面から案件追加・週次自動記録に必要） |
+| `GITHUB_TOKEN` | Fine-grained PAT（下記手順で発行） |
+| `CRON_SECRET` | 週次バッチ保護用のランダム文字列（好きな長い文字列でOK） |
+| `SLACK_WEBHOOK_URL` | （任意）順位下落アラートの通知先Slack Webhook |
+
+### GITHUB_TOKEN の発行（画面から案件追加する場合）
+
+1. GitHub → 右上アイコン → Settings → 左メニュー最下部 **Developer settings**
+2. **Personal access tokens → Fine-grained tokens → Generate new token**
+3. Repository access: **Only select repositories** → このリポジトリを選択
+4. Permissions → Repository permissions → **Contents: Read and write**
+5. Generate → トークンをコピーしてVercelの `GITHUB_TOKEN` に設定
 
 ### 3. Obsidian
 
@@ -56,6 +70,17 @@ vault/案件/<slug>/記事/YYYY-MM-DD-slug.md
 
 frontmatter: `title` / `url` / `keyword` / `published` / `status`。
 `published` の日付で週・月の記事作成数が集計される。
+
+## 週次バッチ（順位監視・レポート）
+
+`vercel.json` のcron設定で毎週月曜9時（JST）に `/api/cron/weekly` が自動実行される。
+
+- 各案件のピラーKW順位を `vault/案件/<slug>/データ/rank-history.json` に記録（52週保持）
+- 週次レポートを `vault/案件/<slug>/レポート/YYYY-Www.md` にコミット
+- 前週から2位以上下落したKWがあればSlackに通知
+- 手動実行（テスト用）: ブラウザで `https://<あなたのURL>/api/cron/weekly?key=<CRON_SECRET>` を開く
+
+※ コミット→Vercelの自動デプロイが走るので、履歴はダッシュボードにも自動反映される。
 
 ## ローカル開発
 

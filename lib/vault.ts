@@ -107,6 +107,23 @@ export function getInsights(slug: string): Insight[] {
     });
 }
 
+export type RankWeek = {
+  week: string; // "2026-W29"
+  date: string; // 記録日
+  positions: Record<string, number | null>; // キーワード→順位（表示なしはnull）
+};
+
+/** 順位履歴（週次cronが vault/案件/<slug>/データ/rank-history.json に蓄積） */
+export function getRankHistory(slug: string): RankWeek[] {
+  const p = path.join(PROJECTS_DIR, slug, "データ", "rank-history.json");
+  try {
+    const data = JSON.parse(fs.readFileSync(p, "utf-8"));
+    return Array.isArray(data.weeks) ? data.weeks : [];
+  } catch {
+    return [];
+  }
+}
+
 /** 期間内に公開された記事数（published基準） */
 export function countArticles(
   articles: Article[],

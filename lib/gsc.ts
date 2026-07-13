@@ -57,6 +57,21 @@ export function range(days: number): { startDate: string; endDate: string } {
   return { startDate: dateStr(start), endDate: dateStr(end) };
 }
 
+/** 直前の同じ長さの期間（前期間比較用） */
+export function prevRange(days: number): { startDate: string; endDate: string } {
+  const end = new Date(Date.now() - (2 + days) * 86400000);
+  const start = new Date(end.getTime() - (days - 1) * 86400000);
+  return { startDate: dateStr(start), endDate: dateStr(end) };
+}
+
+function pageFilter(pageUrl: string) {
+  return [
+    {
+      filters: [{ dimension: "page", operator: "equals", expression: pageUrl }],
+    },
+  ];
+}
+
 export type DailyRow = {
   date: string;
   clicks: number;
@@ -133,6 +148,85 @@ export async function getSummary(
   if (!data) return null;
   const r = (data.rows || [])[0];
   if (!r) return { clicks: 0, impressions: 0, ctr: 0, position: 0 };
+  return {
+    clicks: r.clicks,
+    impressions: r.impressions,
+    ctr: r.ctr,
+    position: r.position,
+  };
+}
+
+/** 特定ページの日別推移 */
+export async function getDailyForPage(
+  site: string,
+  startDate: string,
+  endDate: string,
+  pageUrl: string
+): Promise<DailyRow[] | null> {
+  const data = await query(site, {
+    startDate,
+    endDate,
+    dimensions: ["date"],
+    dimensionFilterGroups: pageFilter(pageUrl),
+    rowLimit: 500,
+  });
+  if (!data) return null;
+  return (data.rows || []).map((r: any) => ({
+    date: r.keys[0],
+    clicks: r.clicks,
+    impressions: r.impressions,
+    ctr: r.ctr,
+    position: r.position,
+  }));
+}
+
+/** 特定ページに流入している検索クエリ */
+export async function getQueriesForPage(
+  site: string,
+  startDate: string,
+  endDate: string,
+  pageUrl: string,
+  limit = 20
+): Promise<TopRow[] | null> {
+  const data = await query(site, {
+    startDate,
+    endDate,
+    dimensions: ["query"],
+    dimensionFilterGroups: pageFilter(pageUrl),
+    rowLimit: limit,
+  });
+  if (!data) return null;
+  return (data.rows || []).map((r: any) => ({
+    key: r.keys[0],
+    clicks: r.clicks,
+    impressions: r.impressions,
+    ctr: r.ctr,
+    position: r.position,
+  }));
+}
+
+/** 特定キーワードの順位（順位監視用） */
+export async function getKeywordPosition(
+  site: string,
+  startDate: string,
+  endDate: string,
+  keyword: string
+): Promise<Summary | null> {
+  const data = await query(site, {
+    startDate,
+    endDate,
+    dimensionFilterGroups: [
+      {
+        filters: [
+          { dimension: "query", operator: "equals", expression: keyword },
+        ],
+      },
+    ],
+    rowLimit: 1,
+  });
+  if (!data) return null;
+  const r = (data.rows || [])[0];
+  if (!r) return null; // その期間に表示なし
   return {
     clicks: r.clicks,
     impressions: r.impressions,

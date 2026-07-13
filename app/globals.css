@@ -86,6 +86,38 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .badge { display: inline-block; font-size: 11px; padding: 2px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .notice { background: var(--accent-soft); border: 1px solid #fcd9a8; border-radius: 10px; padding: 12px 16px; font-size: 13px; margin-bottom: 20px; }
 
+/* 前期間比デルタ・判定フラグ */
+.delta { font-size: 11px; font-weight: 600; }
+.delta.up { color: var(--good); }
+.delta.down { color: var(--bad); }
+.flag {
+  display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 8px;
+  border-radius: 999px; margin-right: 4px; white-space: nowrap;
+}
+.flag-pillar { background: #ecfdf5; color: #059669; }
+.flag-chance { background: #fef3e2; color: #d97706; }
+.flag-title { background: #eff6ff; color: #2563eb; }
+.flag-drop { background: #fef2f2; color: #dc2626; }
+
+/* 案件追加フォーム */
+.form label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+.form input, .form textarea {
+  display: block; width: 100%; margin-top: 4px; padding: 8px 10px;
+  border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
+  font-family: inherit; font-weight: 400; background: var(--bg);
+}
+.form input:focus, .form textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+.form fieldset { border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; }
+.form legend { font-size: 13px; font-weight: 600; padding: 0 6px; }
+.form .radio { display: flex; align-items: center; gap: 8px; font-weight: 400; margin-bottom: 6px; }
+.form .radio input[type="radio"] { width: auto; margin: 0; }
+.form .req { color: var(--bad); font-size: 11px; font-weight: 400; }
+.form button {
+  background: var(--accent); color: #fff; border: none; border-radius: 8px;
+  padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.form button:disabled { opacity: .4; cursor: not-allowed; }
+
 /* 案件詳細のMarkdown */
 .prose h2 { font-size: 15px; margin: 18px 0 8px; }
 .prose ul { padding-left: 22px; }
